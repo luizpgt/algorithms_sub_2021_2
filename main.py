@@ -55,6 +55,7 @@ def cadastrar_produto():
         # lista INDEX permite que sejam controladas
         # as entradas do usuario, e que seja feito
         # um tratamento basico dos dados entrados
+
         index = ['ID', 'NOME', 'PRECO', 'ESTOQUE']
         x = 0 # controla o indice da lista 
 
@@ -111,17 +112,147 @@ def cadastrar_produto():
     x = guia_de_cadastro(valores)
     confirmacao_de_cadastro(valores)
     db_produtos.append(Produto(*x))
+    # IMPTT : fazer com que os produtos sejam adicionados de forma crescente por id
 
     # array de valores limpo apos confirmacao
     valores.clear()
-    return print(f"Produto [{db_produtos[0].nome}] Cadastrado!")
+    return print(f"Produto cadastrado com sucesso!")
+
+def list_produtos():
+    
+    # as variaveis TAM_X sao responsaveis por armazenar 
+    # os tamanhos limites de cada coluna da tabela, ou seja, arma-
+    # zenarao os maiores len() encontrados entre todos os objetos
+    # armazenados
+    tam_id = tam_nome = tam_preco = tam_estoque = 0
+    
+    for obj in db_produtos:
+        
+        # as variaveis a seguir: armazenar o tamanho [len()] de 
+        # cada objeto referente a cada iteracao do laco de repe-
+        # ticao
+        id = len(str(obj.id))
+        nome = len(str(obj.nome))
+        preco = len(str(obj.preco))
+        estoque = len(str(obj.estoque))
+        
+        # abaixo: filtrando os maiores objetos em 'comprimento'
+        # e os armazenando
+        if id > tam_id:
+            tam_id = id
+        if nome > tam_nome:
+            tam_nome = nome
+        if preco > tam_preco:
+            tam_preco = preco
+        if estoque > tam_estoque:
+            tam_estoque = estoque
+
+
+    def print_cabecalho(tam_id, tam_nome, tam_preco, tam_estoque):
+        
+        # as variaveis EXCESSO_X serao responsaveis por 
+        # armazenar a quantia de 'espacos em branco' que serao im-
+        # pressos a partir do nome de cada atributo no cabecalho
+
+        # as variaveis COLUNA_X armazenarao o que sera 
+        # impresso no cabecalho propriamente dito. ela sofre mul-
+        # tiplas concatenacoes para o resultado final 
+        
+        # formatacao identificador
+        excesso_id = tam_id - 2
+        coluna_id = '| ID'
+        coluna_id += ' '*excesso_id
+
+        # formatacao nome
+        excesso_nome = tam_nome - 4
+        coluna_nome = '| NOME' 
+        coluna_nome += ' '*excesso_nome
+        
+        # formatacao preco
+        excesso_preco = tam_preco - 5
+        coluna_preco = '| PRECO' 
+        coluna_preco += ' '*excesso_preco
+        
+        # formatacao estoque
+        excesso_estoque = tam_estoque - 7
+        coluna_estoque = '| ESTOQUE' 
+        coluna_estoque += ' '*excesso_estoque + ' |'
+
+        print(coluna_id, coluna_nome, coluna_preco, coluna_estoque)
     
 
+    def print_corpo(tam_id, tam_nome, tam_preco, tam_estoque):
+         
+        for obj in db_produtos:
+            
+            # convertendo cada atributo dos objetos para 
+            # string para facilitar o manejo da tabela
+            obj_id = str(obj.id)
+            obj_nome = str(obj.nome)
+            obj_preco = str(obj.preco)
+            obj_estoque = str(obj.estoque)
+
+            # as variaveis TAM_MIN_X sao responsaveis por armazenar 
+            # os tamanhos minimos necessarios para cada coluna manter
+            # uma estrutura organizada. esse valor minimo existe em
+            # funcao da limitacao por parte do cabecalho, onde apare-
+            # cem palavras de 2, 4, 5 a 7 letras
+
+            # as variaveis TAM_X possuem o mesmo valor e mesma fun-
+            # cao de quando utilizadas na print_cabecalho(). da mes-
+            # ma forma acontece com as variaveis COLUNA_X, que nesse 
+            # momento tem sua estrutura um pouco diferente
+            
+            # formatacao identificador
+            tam_min_id = 2
+            if tam_min_id > tam_id:
+                excesso_id = tam_min_id - len(obj_id)
+            else:
+                excesso_id = tam_id - len(obj_id)
+            coluna_id = '| '+obj_id
+            if excesso_id >= 0:
+                coluna_id += ' '*excesso_id
+            
+            # formatacao nome
+            tam_min_nome = 4
+            if tam_min_nome > tam_nome:
+                excesso_nome = tam_min_nome - len(obj_nome)
+            else:
+                excesso_nome = tam_nome - len(obj_nome)
+            coluna_nome = '| '+obj_nome
+            if excesso_nome >= 0:
+                coluna_nome += ' '*excesso_nome
+            
+            # formatacao preco
+            tam_min_preco = 5
+            if tam_min_preco > tam_preco:
+                excesso_preco = tam_min_preco - len(obj_preco)
+            else:
+                excesso_preco = tam_preco - len(obj_preco)
+            coluna_preco = '| '+obj_preco
+            if excesso_preco >= 0:
+                coluna_preco += ' '*excesso_preco
+
+            # formatacao estoque
+            tam_min_estoque = 7
+            if tam_min_estoque > tam_estoque:
+                excesso_estoque = tam_min_estoque - len(obj_estoque)
+            else:
+                excesso_estoque = tam_estoque - len(obj_estoque)
+            coluna_estoque = '| '+ obj_estoque
+            if excesso_estoque >= 0:
+                coluna_estoque += ' '*excesso_estoque 
+                coluna_estoque += ' |'
+
+            print(coluna_id, coluna_nome, coluna_preco, coluna_estoque)
     
-#funcao principal - pagina principal - lista de opcoes
+    print_cabecalho(tam_id, tam_nome, tam_preco, tam_estoque)
+    print_corpo(tam_id, tam_nome, tam_preco, tam_estoque)
+    
+# pagina principal - lista de opcoes
 def main():
     while True: 
-        print("\n\nEscolha o que desejas fazer:\n\t[1] \tcadastrar um novo produto\n\t[-255] \tsair")
+        print("\n\nEscolha o que desejas fazer:\n\t[1] \tcadastrar um novo produto\n\t[2] \tlistar produtos\n\t[-255] \tsair")
         acao = input("Entrada: ")
         try:
             acao = int(acao)
@@ -130,6 +261,8 @@ def main():
                     cadastrar_produto()
                 except KeyboardInterrupt:
                     print("\n\t\t[ Cadastro cancelado! ]")
+            elif acao == 2:
+                list_produtos()
             elif acao == -255:
                 print("Obrigado por usar o programa!")
                 return False
