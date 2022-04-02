@@ -118,8 +118,13 @@ def cadastrar_produto():
     valores.clear()
     return print(f"Produto cadastrado com sucesso!")
 
-def list_produtos():
-    
+def list_produtos(): # listagem de TODOS os produtos cadastrados
+   
+    # caso não tenham produtos cadastrados, sera notificado que
+    # a tabela nao possui elementos para fazer a listagem
+    if len(db_produtos) < 1:
+        raise Exception
+        
     # as variaveis TAM_X sao responsaveis por armazenar 
     # os tamanhos limites de cada coluna da tabela, ou seja, arma-
     # zenarao os maiores len() encontrados entre todos os objetos
@@ -179,6 +184,10 @@ def list_produtos():
         coluna_estoque += ' '*excesso_estoque + ' |'
 
         print(coluna_id, coluna_nome, coluna_preco, coluna_estoque)
+
+        # a linha que separa o cabecalho do corpo: de tamanho total da tabela
+        linha_sep = coluna_id +' '+ coluna_nome +' '+ coluna_preco +' '+ coluna_estoque
+        print('-'*len(linha_sep))
     
 
     def print_corpo(tam_id, tam_nome, tam_preco, tam_estoque):
@@ -262,12 +271,17 @@ def main():
                 except KeyboardInterrupt:
                     print("\n\t\t[ Cadastro cancelado! ]")
             elif acao == 2:
-                list_produtos()
+                try:
+                    list_produtos()
+                except:
+                    print("Aparentemente a lista de produtos está vazia!")
             elif acao == -255:
                 print("Obrigado por usar o programa!")
                 return False
             else:
                 raise IndexError
+        except IndexError:
+            print("Parece que sua entrada não condiz com nenhuma opção! Por Favor, tente novamente.")
         except:
             print("Sua entrada foi considerada inválida! Por Favor, tente novamente:")
 print("\tSeja Bem Vindo, sr. Operador!")
