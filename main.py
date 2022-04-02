@@ -13,9 +13,43 @@ class Produto ():
 
 # esta funcao possui encapsulamento
 def cadastrar_produto():
-    print("Seja Bem Vindo\nAo CADASTRO de produtos!")
+
+    print("\nVocê está em: CADASTRO de produtos!")
+    print("Para cancelar a ação de CADASTRO a qualquer momento, pressione a combinação de teclas CTRL+C\n")
+    # array para armazenar entradas do usuario que 
+    # posteriormente serao adicionadas ao objeto
     valores = []
 
+    def is_duplo_id(id):
+        for objeto in db_produtos:
+            if id == objeto.id:
+                return True
+    
+    def is_string(nome):
+        nome = nome.lower()
+        alfabeto = 'abcdefghijklmnopqrstuvwxyz'
+        cont = 0
+        for letra in list(alfabeto):
+            if letra in nome:
+                cont += 1
+        if cont > 0:
+            return True
+        else:
+            return False
+
+    def is_valid_preco(preco):
+        if is_string(preco) == False:
+            virgula = ','
+            if virgula in preco:
+                preco = preco.replace(virgula, '.')
+            preco = float(preco)
+            return preco
+        else:
+            return False
+
+    def confirmacao_de_cadastro(valores):
+        print("O produto será cadastrado com as seguintes informações:\n")
+        #sera adicionado mais codigo aqui  
     def guia_de_cadastro(valores):
         
         # lista INDEX permite que sejam controladas
@@ -39,25 +73,43 @@ def cadastrar_produto():
             try:
                 if index[x] == 'ID':
                     valor = int(valor)
-                    # ADICIONAR VERIFICACAO DE DUPLO ID
-                    valores.append(valor)            
+                    # verifica uma possivel ocorrencia
+                    # de identificador duplicado
+                    if is_duplo_id(valor) == True:
+                        raise IndexError
+                    else:
+                        valores.append(valor)
                 elif index[x] == 'NOME':
                     valor = str(valor)
-                    # ADICIONAR VERIFICACAO DE PALAVRA VERDADEIRA
-                    valores.append(valor)
+                    # verifica se a entrada eh realmente
+                    # uma string antes de a armazenar
+                    if is_string(valor) == True:
+                        valores.append(valor)
+                    else:
+                        raise ValueError
                 elif index[x] == 'PRECO':
-                    valor = float(valor)
-                    valores.append(valor)
+                    # verifica se a entrada eh realmente um float
+                    # antes de a armazenar
+                    valor = is_valid_preco(valor)
+                    if  valor == False: 
+                        raise ValueError
+                    elif isinstance(valor, float) == True:
+                        valores.append(valor)
                 elif index[x] == 'ESTOQUE':
                     valor = int(valor)
                     valores.append(valor)
                 # altera o valor do index caso a entrada seja aceita e adicionada
                 x += 1
+            except IndexError:
+                print("O Valor adicionado pertence a outro produto! Entre um novo identificador único.")
             except:
                 print(f"Valor inválido para {index[x]}! \nPor Favor, verifique novamente o conteúdo de sua entrada!\n")
         return valores 
     
+    # armazena as informacoes no 
+    # objeto e no array de objetos
     x = guia_de_cadastro(valores)
+    confirmacao_de_cadastro(valores)
     db_produtos.append(Produto(*x))
 
     # array de valores limpo apos confirmacao
@@ -65,6 +117,7 @@ def cadastrar_produto():
     return print(f"Produto [{db_produtos[0].nome}] Cadastrado!")
     
 
+    
 #funcao principal - pagina principal - lista de opcoes
 def main():
     while True: 
@@ -73,12 +126,16 @@ def main():
         try:
             acao = int(acao)
             if acao == 1:
-                cadastrar_produto()
+                try:
+                    cadastrar_produto()
+                except KeyboardInterrupt:
+                    print("\n\t\t[ Cadastro cancelado! ]")
             elif acao == -255:
                 print("Obrigado por usar o programa!")
                 return False
+            else:
+                raise IndexError
         except:
             print("Sua entrada foi considerada inválida! Por Favor, tente novamente:")
-    #if isinstance(acao, int):
 print("\tSeja Bem Vindo, sr. Operador!")
 main()
