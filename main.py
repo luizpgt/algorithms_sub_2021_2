@@ -14,10 +14,25 @@ class Produto ():
 def print_sys_mensagem(msg):
     print("\n","-"*len(msg),"\n",msg,"\n","-"*len(msg))
 
+# essa funcao situa o usuario, sobre onde ele esta, dentro do sistema.
+def print_sessao_programa(sessao):
+    print("\n",sessao,"\n","-"*15)
+
+def is_string(palavra):
+    palavra = palavra.lower()
+    alfabeto = 'abcdefghijklmnopqrstuvwxyz'
+    cont = 0
+    for letra in list(alfabeto):
+        if letra in palavra:
+            cont += 1
+    if cont > 0:
+        return True
+    else:
+        return False
+
 # esta funcao possui encapsulamento
 def cadastrar_produto():
-
-    print("\nVocê está em: CADASTRO de produtos!")
+    print_sessao_programa("CADASTRO")
     print("Para cancelar a ação de CADASTRO a qualquer momento, pressione a combinação de teclas CTRL+C\n")
     # array para armazenar entradas do usuario que 
     # posteriormente serao adicionadas ao objeto
@@ -27,18 +42,6 @@ def cadastrar_produto():
         for objeto in db_produtos:
             if id == objeto.id:
                 return True
-    
-    def is_string(nome):
-        nome = nome.lower()
-        alfabeto = 'abcdefghijklmnopqrstuvwxyz'
-        cont = 0
-        for letra in list(alfabeto):
-            if letra in nome:
-                cont += 1
-        if cont > 0:
-            return True
-        else:
-            return False
 
     def is_valid_preco(preco):
         if is_string(preco) == False:
@@ -52,10 +55,10 @@ def cadastrar_produto():
 
     def confirmacao_de_cadastro(cad_info):
         print("\n\nDeseja inserir o produto:")
-        list_produtos(cad_info)
+        listar_produtos(cad_info)
         confirmacao = input('\n(S/n): ')
         print()
-        confirmacao.lower()
+        confirmacao = confirmacao.lower()
         if confirmacao == 's':
             confirmacao = True
         elif confirmacao == 'n':
@@ -100,6 +103,7 @@ def cadastrar_produto():
                     # verifica se a entrada eh realmente
                     # uma string antes de a armazenar
                     if is_string(valor) == True:
+                        valor = valor.capitalize()
                         valores.append(valor)
                     else:
                         raise ValueError
@@ -139,7 +143,7 @@ def cadastrar_produto():
         except:
             print_sys_mensagem("O valor entrado não corresponde com nenhuma opção listada!")
 
-def list_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
+def listar_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
    
     # caso não tenham produtos cadastrados, sera notificado que
     # a tabela nao possui elementos para fazer a listagem
@@ -278,11 +282,41 @@ def list_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
     
     print_cabecalho(tam_id, tam_nome, tam_preco, tam_estoque)
     print_corpo(tam_id, tam_nome, tam_preco, tam_estoque)
-    
+
+def buscar_produto(elemento_busca):
+    resultado = []
+    isString = is_string(elemento_busca)
+    if isString == False:
+        elemento_busca = int(elemento_busca)
+    else:
+        elemento_busca = elemento_busca.lower()
+    if isinstance(elemento_busca, int) == True:
+        for produto in db_produtos:
+            if elemento_busca == produto.id:
+                resultado.append(produto)
+                print(f"produto encontrado: \n")
+    if isinstance(elemento_busca, str) == True:
+        for produto in db_produtos:
+            nome = produto.nome.lower()
+            if elemento_busca == nome:
+                print('1 prod encontrado')
+                resultado.insert(0, produto)
+            elif elemento_busca in nome:
+                print('outro prod encontrado')
+                resultado.append(produto)
+    if resultado:
+        return resultado
+    else:
+        raise Exception # produto nao encontrado
+
 # pagina principal - lista de opcoes
 def main():
     while True: 
-        print("\n\nEscolha o que desejas fazer:\n\t[1] \tcadastrar um novo produto\n\t[2] \tlistar produtos\n\t[-255] \tsair")
+        print("\n\nEscolha o que desejas fazer:")
+        print("\t[1] \tcadastrar um novo produto")
+        print("\t[2] \tlistar produtos")
+        print("\t[3] \tbuscar produto")
+        print("\t[-255] \tsair")
         acao = input("Entrada: ")
         try:
             acao = int(acao)
@@ -293,9 +327,17 @@ def main():
                     print_sys_mensagem("Cadastro cancelado!")
             elif acao == 2:
                 try:
-                    list_produtos(db_produtos)
+                    print_sessao_programa("LISTAGEM")
+                    listar_produtos(db_produtos)
                 except:
                     print_sys_mensagem("Aparentemente a lista de produtos está vazia!")
+            elif acao == 3:
+                print_sessao_programa("BUSCAR")
+                try:
+                    busca = input("Entre um nome ou código do produto: ")
+                    listar_produtos(buscar_produto(busca))
+                except:
+                    print_sys_mensagem("Produto não encontrado!")
             elif acao == -255:
                 print_sys_mensagem("Obrigado por usar o programa!")
                 return False
