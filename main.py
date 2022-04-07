@@ -47,9 +47,21 @@ def cadastrar_produto():
         else:
             return False
 
-    def confirmacao_de_cadastro(valores):
-        print("O produto será cadastrado com as seguintes informações:\n")
-        #sera adicionado mais codigo aqui  
+    def confirmacao_de_cadastro(cad_info):
+        print("\n\nDeseja inserir o produto:")
+        list_produtos(cad_info)
+        confirmacao = input('\n(S/n): ')
+        print()
+        confirmacao.lower()
+        if confirmacao == 's':
+            confirmacao = True
+        elif confirmacao == 'n':
+            confirmacao == False
+        else:
+            raise Exception
+        
+        return confirmacao
+    
     def guia_de_cadastro(valores):
         
         # lista INDEX permite que sejam controladas
@@ -63,13 +75,13 @@ def cadastrar_produto():
             if x >= len(index):
                 break
             elif index[x] == 'ID':
-                print("entre o código do produto a ser adicionado: ", end=' ')
+                print("Código do produto a ser adicionado: ", end=' ')
             elif index[x] == 'NOME':
-                print("entre o nome do produto a ser adicionado: ", end=' ')
+                print("Nome do produto: \t\t", end=' ')
             elif index[x] == 'PRECO':
-                print("entre o preco do produto a ser adicionado: ", end=' ')
+                print("Preco do produto: \t\t", end=' ')
             elif index[x] == 'ESTOQUE':
-                print("entre a quantia do produto X em estoque: ", end=' ')
+                print("Quantia do produto em estoque: ", end=' ')
             valor = input("\t\t")
             try:
                 if index[x] == 'ID':
@@ -109,20 +121,26 @@ def cadastrar_produto():
     
     # armazena as informacoes no 
     # objeto e no array de objetos
-    x = guia_de_cadastro(valores)
-    confirmacao_de_cadastro(valores)
-    db_produtos.append(Produto(*x))
-    # IMPTT : fazer com que os produtos sejam adicionados de forma crescente por id
+    cad_info = []
+    cad_info.append(Produto(*guia_de_cadastro(valores)))
+    while True:
+        try:
+            if confirmacao_de_cadastro(cad_info) == True:
+                db_produtos.append(*cad_info)
+                print(f"Produto cadastrado com sucesso!")
+            else:
+                print("Cadastro Cancelado!")
+            # array de valores limpo apos confirmacao
+            cad_info.clear()
+            return False
+        except:
+            print("O valor entrado não corresponde com nenhuma opção listada!")
 
-    # array de valores limpo apos confirmacao
-    valores.clear()
-    return print(f"Produto cadastrado com sucesso!")
-
-def list_produtos(): # listagem de TODOS os produtos cadastrados
+def list_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
    
     # caso não tenham produtos cadastrados, sera notificado que
     # a tabela nao possui elementos para fazer a listagem
-    if len(db_produtos) < 1:
+    if len(lista_de_obj) < 1: # ALTERAR-----------------------------------------------------------
         raise Exception
         
     # as variaveis TAM_X sao responsaveis por armazenar 
@@ -131,7 +149,7 @@ def list_produtos(): # listagem de TODOS os produtos cadastrados
     # armazenados
     tam_id = tam_nome = tam_preco = tam_estoque = 0
     
-    for obj in db_produtos:
+    for obj in lista_de_obj:
         
         # as variaveis a seguir: armazenar o tamanho [len()] de 
         # cada objeto referente a cada iteracao do laco de repe-
@@ -192,7 +210,7 @@ def list_produtos(): # listagem de TODOS os produtos cadastrados
 
     def print_corpo(tam_id, tam_nome, tam_preco, tam_estoque):
          
-        for obj in db_produtos:
+        for obj in lista_de_obj:
             
             # convertendo cada atributo dos objetos para 
             # string para facilitar o manejo da tabela
@@ -272,7 +290,7 @@ def main():
                     print("\n\t\t[ Cadastro cancelado! ]")
             elif acao == 2:
                 try:
-                    list_produtos()
+                    list_produtos(db_produtos)
                 except:
                     print("Aparentemente a lista de produtos está vazia!")
             elif acao == -255:
