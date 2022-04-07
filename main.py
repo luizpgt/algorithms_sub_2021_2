@@ -11,6 +11,9 @@ class Produto ():
         self.preco = preco
         self.estoque = estoque
 
+def print_sys_mensagem(msg):
+    print("\n","-"*len(msg),"\n",msg,"\n","-"*len(msg))
+
 # esta funcao possui encapsulamento
 def cadastrar_produto():
 
@@ -114,9 +117,9 @@ def cadastrar_produto():
                 # altera o valor do index caso a entrada seja aceita e adicionada
                 x += 1
             except IndexError:
-                print("O Valor adicionado pertence a outro produto! Entre um novo identificador único.")
+                print_sys_mensagem("O Valor adicionado pertence a outro produto! Entre um novo identificador único.")
             except:
-                print(f"Valor inválido para {index[x]}! \nPor Favor, verifique novamente o conteúdo de sua entrada!\n")
+                print_sys_mensagem(f"Valor inválido para {index[x]}! Por Favor, verifique novamente o conteúdo de sua entrada!")
         return valores 
     
     # armazena as informacoes no 
@@ -127,14 +130,14 @@ def cadastrar_produto():
         try:
             if confirmacao_de_cadastro(cad_info) == True:
                 db_produtos.append(*cad_info)
-                print(f"Produto cadastrado com sucesso!")
+                print_sys_mensagem("Produto cadastrado com sucesso!")
             else:
-                print("Cadastro Cancelado!")
+                print_sys_mensagem("Cadastro Cancelado!")
             # array de valores limpo apos confirmacao
             cad_info.clear()
             return False
         except:
-            print("O valor entrado não corresponde com nenhuma opção listada!")
+            print_sys_mensagem("O valor entrado não corresponde com nenhuma opção listada!")
 
 def list_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
    
@@ -287,20 +290,20 @@ def main():
                 try:
                     cadastrar_produto()
                 except KeyboardInterrupt:
-                    print("\n\t\t[ Cadastro cancelado! ]")
+                    print_sys_mensagem("Cadastro cancelado!")
             elif acao == 2:
                 try:
                     list_produtos(db_produtos)
                 except:
-                    print("Aparentemente a lista de produtos está vazia!")
+                    print_sys_mensagem("Aparentemente a lista de produtos está vazia!")
             elif acao == -255:
-                print("Obrigado por usar o programa!")
+                print_sys_mensagem("Obrigado por usar o programa!")
                 return False
             else:
                 raise IndexError
         except IndexError:
-            print("Parece que sua entrada não condiz com nenhuma opção! Por Favor, tente novamente.")
+            print_sys_mensagem("Parece que sua entrada não condiz com nenhuma opção! Por Favor, tente novamente.")
         except:
-            print("Sua entrada foi considerada inválida! Por Favor, tente novamente:")
+            print_sys_mensagem("Sua entrada foi considerada inválida! Por Favor, tente novamente:")
 print("\tSeja Bem Vindo, sr. Operador!")
 main()
