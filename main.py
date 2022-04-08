@@ -346,7 +346,7 @@ def cadastrar_compra():
             return False
 
     def confirmar_insercao(prod_info):
-        print("\nINFORMAÇÕES SOBRE O PRODUTO: ")
+        print("\nINFORMAÇÕES DA COMPRA: ")
         listar_produtos(prod_info)
         while True:
             try:
@@ -364,7 +364,21 @@ def cadastrar_compra():
             except:
                 print_sys_mensagem("Entre uma alternativa válida.")
                     
-    def carrinho_de_compras(prod_adc):
+    def fechar_compra(carrinho):
+        print_sessao_programa("CUPOM FISCAL: ")
+        listar_produtos(carrinho)
+        total_compra = 0
+        for produto_comprado in carrinho:
+            total_compra += produto_comprado.preco
+            for produto in db_produtos:
+                if produto_comprado.id == produto.id:
+                    produto.estoque -= produto_comprado.estoque
+
+        print_sys_mensagem(f"Preço Total da compra: {total_compra}")
+        
+        return True
+
+    def add_to_carrinho(prod_adc):
         prod_adc = prod_adc[0]
         print_sessao_programa("CARRINHO:")
         carrinho.append(prod_adc)
@@ -378,7 +392,10 @@ def cadastrar_compra():
             produto = input()
             if is_string(produto) == True:
                 if produto.lower() == 'ok':
-                    return False
+                    if fechar_compra(carrinho) == True:
+                        return False
+                    else: 
+                        raise KeyboardInterrupt
             else: 
                 produto = int(produto)
             if produto == -255:
@@ -389,10 +406,12 @@ def cadastrar_compra():
             prod_info = buscar_produto(produto)
             
             prod_info[0].estoque = qtd_compra
+            prod_info[0].preco = prod_info[0].preco*qtd_compra
+
             confirmacao_insercao = confirmar_insercao(prod_info)
             disponibilidade_estoque = is_qtd_disponivel(prod_info, qtd_compra)
             if confirmacao_insercao == True and disponibilidade_estoque == True:
-                carrinho_de_compras(prod_info)
+                add_to_carrinho(prod_info)
             elif confirmacao_insercao == False:
                 print_sys_mensagem("O produto não foi inserido !")
             elif disponibilidade_estoque == False:
@@ -401,8 +420,8 @@ def cadastrar_compra():
             print_sys_mensagem("Compra cancelada")
             return False
         except:
-            print_sys_mensagem("Por Favor, verifique o valor do código e/ou quantidade entrados.")
-            
+            print_sys_mensagem("Por Favor, verifique o valor do código e/ou quantidade entrados.")     
+
 # pagina principal - lista de opcoes
 def main():
     while True: 
