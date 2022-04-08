@@ -1,5 +1,6 @@
 #ALUNO: luiz paulo grafetti terres
 #MATERIA: algoritmos e lógica de programacao 2021.2
+from copy import copy
 
 # lista de PRODUTOS de escopo global: 'banco' de produtos. 
 db_produtos = []
@@ -19,6 +20,7 @@ def print_sessao_programa(sessao):
     print("\n",sessao,"\n","-"*15)
 
 def is_string(palavra):
+    palavra = str(palavra) 
     palavra = palavra.lower()
     alfabeto = 'abcdefghijklmnopqrstuvwxyz'
     cont = 0
@@ -147,7 +149,7 @@ def listar_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
    
     # caso não tenham produtos cadastrados, sera notificado que
     # a tabela nao possui elementos para fazer a listagem
-    if len(lista_de_obj) < 1: # ALTERAR-----------------------------------------------------------
+    if len(lista_de_obj) < 1: 
         raise Exception
         
     # as variaveis TAM_X sao responsaveis por armazenar 
@@ -204,8 +206,8 @@ def listar_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
         coluna_preco += ' '*excesso_preco
         
         # formatacao estoque
-        excesso_estoque = tam_estoque - 7
-        coluna_estoque = '| ESTOQUE' 
+        excesso_estoque = tam_estoque - 10
+        coluna_estoque = '| QUANTIDADE' 
         coluna_estoque += ' '*excesso_estoque + ' |'
 
         print(coluna_id, coluna_nome, coluna_preco, coluna_estoque)
@@ -268,7 +270,7 @@ def listar_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
                 coluna_preco += ' '*excesso_preco
 
             # formatacao estoque
-            tam_min_estoque = 7
+            tam_min_estoque = 10
             if tam_min_estoque > tam_estoque:
                 excesso_estoque = tam_min_estoque - len(obj_estoque)
             else:
@@ -293,22 +295,114 @@ def buscar_produto(elemento_busca):
     if isinstance(elemento_busca, int) == True:
         for produto in db_produtos:
             if elemento_busca == produto.id:
-                resultado.append(produto)
-                print(f"produto encontrado: \n")
+                copia_prod = copy(produto)
+                resultado.append(copia_prod)
     if isinstance(elemento_busca, str) == True:
         for produto in db_produtos:
             nome = produto.nome.lower()
+            copia_prod = copy(produto)
             if elemento_busca == nome:
-                print('1 prod encontrado')
-                resultado.insert(0, produto)
+                resultado.insert(0, copia_prod)
             elif elemento_busca in nome:
-                print('outro prod encontrado')
-                resultado.append(produto)
+                resultado.append(copia_prod)
     if resultado:
         return resultado
     else:
         raise Exception # produto nao encontrado
 
+def cadastrar_compra():
+
+    # onde serao armazenadas informacoes sobre a compra
+    carrinho = []
+
+    def is_repetido(compra_info):
+        for produto in carrinho:
+            if compra_info[0].id == produto.id:
+                return True
+        return False
+    # caso tenham quantidades disponiveis do
+    # produto no estoque, retornara POSITIVO
+    # para continuar a compra
+    def is_qtd_disponivel(info_compra, qtd_compra):
+        qtd_estoque = 0
+        
+        for produto in db_produtos:
+            if info_compra[0].id == produto.id:
+                # armazena a quantidade total 
+                # em estoque do produto sendo
+                # comprado
+                qtd_estoque = produto.estoque
+        if is_repetido(info_compra) == True:
+            for produto in carrinho:
+                if info_compra[0].id == produto.id:
+                    # soma as quantidades de um 
+                    # mesmo produto no carrinho
+                    qtd_compra += produto.estoque
+
+        if qtd_estoque >= qtd_compra:
+            return True
+        else:
+            print_sys_mensagem(f"A quantidade excede a máxima disponível em: {(qtd_estoque-qtd_compra)*-1} unidade(s).")
+            return False
+
+    def confirmar_insercao(prod_info):
+        print("\nINFORMAÇÕES SOBRE O PRODUTO: ")
+        listar_produtos(prod_info)
+        while True:
+            try:
+                if is_repetido(prod_info) == True:
+                    print("Este produto já está no carrinho. Deseja efetuar uma segunda entrada? (s/n) ", end="")
+                else: 
+                    print("Deseja adicionar o produto ao carrinho? (S/n) ", end="")
+                confirmacao = input()
+                if confirmacao.lower() == 's':
+                    return True
+                elif confirmacao.lower() == 'n':
+                    return False
+                else:
+                    raise Exception
+            except:
+                print_sys_mensagem("Entre uma alternativa válida.")
+                    
+    def carrinho_de_compras(prod_adc):
+        prod_adc = prod_adc[0]
+        print_sessao_programa("CARRINHO:")
+        carrinho.append(prod_adc)
+        listar_produtos(carrinho)
+
+    while True:
+        try:
+            print("\nPara cancelar a compra acione: \tCtrl+C")
+            print("Para fechar o carrinho: \t'ok'")
+            print("Digite o código do produto que deseja adicionar ao carrinho: ", end="")
+            produto = input()
+            if is_string(produto) == True:
+                if produto.lower() == 'ok':
+                    return False
+            else: 
+                produto = int(produto)
+            if produto == -255:
+                return False
+            print("Quantidade: ",end="")
+            qtd_compra = int(input())
+            prod_info = []
+            prod_info = buscar_produto(produto)
+            
+            prod_info[0].estoque = qtd_compra
+            confirmacao_insercao = confirmar_insercao(prod_info)
+            disponibilidade_estoque = is_qtd_disponivel(prod_info, qtd_compra)
+            if confirmacao_insercao == True and disponibilidade_estoque == True:
+                carrinho_de_compras(prod_info)
+            elif confirmacao_insercao == False:
+                print_sys_mensagem("O produto não foi inserido !")
+            elif disponibilidade_estoque == False:
+                print_sys_mensagem("Quantidade não disponível em estoque. Produto não inserido !")
+        except KeyboardInterrupt:
+            print_sys_mensagem("Compra cancelada")
+            return False
+        except:
+            print_sys_mensagem("Por Favor, verifique o valor do código e/ou quantidade entrados.")
+            
 # pagina principal - lista de opcoes
 def main():
     while True: 
@@ -316,6 +410,7 @@ def main():
         print("\t[1] \tcadastrar um novo produto")
         print("\t[2] \tlistar produtos")
         print("\t[3] \tbuscar produto")
+        print("\t[4] \tcadastrar uma compra")
         print("\t[-255] \tsair")
         acao = input("Entrada: ")
         try:
@@ -338,6 +433,9 @@ def main():
                     listar_produtos(buscar_produto(busca))
                 except:
                     print_sys_mensagem("Produto não encontrado!")
+            elif acao == 4:
+                print_sessao_programa("ADICIOINAR COMPRA")
+                cadastrar_compra()
             elif acao == -255:
                 print_sys_mensagem("Obrigado por usar o programa!")
                 return False
