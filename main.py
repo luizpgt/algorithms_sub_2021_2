@@ -12,6 +12,7 @@ class Produto ():
         self.preco = preco
         self.estoque = estoque
 
+# exibe mensagens formatadas visando atencao do usuario
 def print_sys_mensagem(msg):
     print("\n","-"*len(msg),"\n",msg,"\n","-"*len(msg),"\n")
 
@@ -19,6 +20,7 @@ def print_sys_mensagem(msg):
 def print_sessao_programa(sessao):
     print("\n",sessao,"\n","-"*15)
 
+# verifica se a entrada eh uma string 
 def is_string(palavra):
     palavra = str(palavra) 
     palavra = palavra.lower()
@@ -32,8 +34,8 @@ def is_string(palavra):
     else:
         return False
 
-# esta funcao possui encapsulamento
 def cadastrar_produto():
+
     print_sessao_programa("CADASTRO")
     print("Para cancelar a ação de CADASTRO a qualquer momento, pressione a combinação de teclas CTRL+C\n")
     # array para armazenar entradas do usuario que 
@@ -47,6 +49,10 @@ def cadastrar_produto():
 
     def is_valid_preco(preco):
         if is_string(preco) == False:
+            
+            # caso o usuario tenha entrado um float
+            # no formato com virgula, sera feita uma
+            # troca desse caractere para um '.'
             virgula = ','
             if virgula in preco:
                 preco = preco.replace(virgula, '.')
@@ -58,7 +64,7 @@ def cadastrar_produto():
     def confirmacao_de_cadastro(cad_info):
         print("\n\nDeseja inserir o produto:")
         listar_produtos(cad_info)
-        confirmacao = input('\n(S/n): ')
+        confirmacao = input('\n(s/n): ')
         print()
         confirmacao = confirmacao.lower()
         if confirmacao == 's':
@@ -83,7 +89,7 @@ def cadastrar_produto():
             if x >= len(index):
                 break
             elif index[x] == 'ID':
-                print("Código do produto a ser adicionado: ", end=' ')
+                print("Código do produto: \t\t", end=' ')
             elif index[x] == 'NOME':
                 print("Nome do produto: \t\t", end=' ')
             elif index[x] == 'PRECO':
@@ -123,9 +129,9 @@ def cadastrar_produto():
                 # altera o valor do index caso a entrada seja aceita e adicionada
                 x += 1
             except IndexError:
-                print_sys_mensagem("O Valor adicionado pertence a outro produto! Entre um novo identificador único.")
+                print_sys_mensagem("O Valor adicionado pertence a outro produto! Entre um novo identificador único !")
             except:
-                print_sys_mensagem(f"Valor inválido para {index[x]}! Por Favor, verifique novamente o conteúdo de sua entrada!")
+                print_sys_mensagem(f"Valor inválido para {index[x]}. Verifique novamente o conteúdo de sua entrada !")
         return valores 
     
     # armazena as informacoes no 
@@ -136,14 +142,14 @@ def cadastrar_produto():
         try:
             if confirmacao_de_cadastro(cad_info) == True:
                 db_produtos.append(*cad_info)
-                print_sys_mensagem("Produto cadastrado com sucesso!")
+                print_sys_mensagem("Produto cadastrado com Sucesso !")
             else:
-                print_sys_mensagem("Cadastro Cancelado!")
+                print_sys_mensagem("Cadastro Cancelado !")
             # array de valores limpo apos confirmacao
             cad_info.clear()
             return False
         except:
-            print_sys_mensagem("O valor entrado não corresponde com nenhuma opção listada!")
+            print_sys_mensagem("O valor entrado não corresponde com nenhuma opção listada !")
 
 def listar_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
    
@@ -288,75 +294,59 @@ def listar_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
 
 def buscar_produto(elemento_busca):
     resultado = []
+
     isString = is_string(elemento_busca)
     if isString == False:
         elemento_busca = int(elemento_busca)
     else:
         elemento_busca = elemento_busca.lower()
+    
+    # caso o usuario entre um codigo para busca
     if isinstance(elemento_busca, int) == True:
         for produto in db_produtos:
             if elemento_busca == produto.id:
                 copia_prod = copy(produto)
                 resultado.append(copia_prod)
+
+    # caso o usuario entre um nome para busca
     if isinstance(elemento_busca, str) == True:
         for produto in db_produtos:
             nome = produto.nome.lower()
             copia_prod = copy(produto)
             if elemento_busca == nome:
+                # para casos onde a entrada seja exatamente
+                # igual ao produto encontrado, o produto re-
+                # tornado ira para o topo da lista de resultados
                 resultado.insert(0, copia_prod)
             elif elemento_busca in nome:
+                # casos onde a string de entrada esta contida
+                # no nome de algum objeto (semelhante)
                 resultado.append(copia_prod)
+    
     if resultado:
         return resultado
     else:
         raise Exception # produto nao encontrado
 
 def atualizar_produto():
+
     def selecionar_produto():
-        print("Nome ou código do produto que deseja alterar: ", end="")
+        print("Código do produto: ", end="")
         produto_entrado = input()
+        produto_entrado = int(produto_entrado)
         produto = buscar_produto(produto_entrado)
         
-        # para cada obj dentro do resultado
-        # da busca, verificar se existem no-
-        # mes de prod iguais
-        cont_iguais = 0
-
-        if len(produto) > 1:
-            for obj in produto:
-                nome = obj.nome
-                if produto_entrado.lower() == nome.lower():
-                    cont_iguais += 1
-            if cont_iguais == 1:
-                for i in range(1,len(produto)):
-                    produto.pop(i)
-            elif cont_iguais > 1:
-                for obj in produto:
-                    if produto_entrado.lower() != obj.nome.lower():
-                        produto.remove(obj)
-                print_sys_mensagem("Foram encontradas mais de uma correspondência para este nome!")
-                listar_produtos(produto)
-                print_sys_mensagem("Por Favor, entre dessa vez o código do produto que desejar: ")
-                selecionar_produto()
-
         if len(produto) == 1:
             return produto
         else: 
             raise Exception
-#        if len(produto) > 1:
- #           produto_valido = []
- #           if produto_entrado == produto[0].name:
-#                produto_valido.append(produto[0])
- #               return produto_valido
- #       else:
-  #          return produto
 
     def selecionar_mudanca(produto):
         print_sessao_programa("Produto selecionado")
         listar_produtos(produto)
         while True:
             try: 
-                print("\nSelecione o que desejas alterar: ")
+                print("\nSelecione o que alterar: ")
                 print("\t[1] Preço")
                 print("\t[2] Quantia em estoque")
                 print("\t[3] Alterar Quantia e Preço do produto")
@@ -366,78 +356,103 @@ def atualizar_produto():
                 else:
                     raise Exception
             except KeyboardInterrupt:
+                # caso o usuario queira cancelar a alteracao (Ctrl+C)
                 raise KeyboardInterrupt
             except:
-                print_sys_mensagem("Entre uma opção válida")
+                print_sys_mensagem("Entre uma opção válida !")
+
     def entrar_alteracoes(mudanca):
-        alteracoes = []
-        alteracao = 0
+
+        alteracoes = [] # usado para mudanca = 3
+        alteracao = 0 # usado caso mudanca = 1 ou 2
+
+        # novo preco e estoque sao inicializados com false 
+        # para podermos ter controle caso o usuario entre
+        # um valor invalido somente para o estoque e um va-
+        # lido para preco (e o bloco TRY abaixo precise ser
+        # chamado mais de uma vez). importante para manter 
+        # a linearidade do ponto de vista do usuario
         novo_preco = novo_estoque = False    
+        
         while True:
             try: 
                 if mudanca == 1 or mudanca == 3:
                     if novo_preco == False:
-                        print("Entre um novo valor de preço para o produto: ")
+                        print("Novo Preço: ")
                         novo_preco = float(input())
+                        
                         if mudanca == 3:
+                            # caso 3 = alterar preco e estoque
                             alteracoes.append(novo_preco) 
                         else:
+                            # caso 1 alterar somente preco
                             alteracao = novo_preco
 
                 if mudanca == 2 or mudanca == 3:
                     if novo_estoque == False:
-                        print("Entre um novo valor para a quantia em estoque do produto: ")
+                        print("Nova quantia em Estoque: ")
                         novo_estoque = int(input()) 
                         if mudanca == 3:
+                            # caso 3 alterar preco e estoque
                             alteracoes.append(novo_estoque)
                         else:
+                            # caso 2 alterar estoque
                             alteracao = novo_estoque
-                return alteracoes if mudanca == 3 else alteracao
-            except KeyboardInterrupt:
                 
-                # caso o usuario opte por cancelar
-                # a atualizacao do cadastro
+                return alteracoes if mudanca == 3 else alteracao
+            
+            except KeyboardInterrupt:
+                # cancela atualizacao de cadastro
                 raise KeyboardInterrupt
             except:
-                print_sys_mensagem("Verifique se os valores entrados são válidos")
+                print_sys_mensagem("Verifique se os valores entrados são válidos !")
 
-    def aplicar_alteracao(copia_prod_alterado):
+    def aplicar_alteracao(prod_alterado):
         for produto in db_produtos:
-            if copia_prod_alterado[0].id == produto.id:
-                produto.preco = copia_prod_alterado[0].preco
-                produto.estoque = copia_prod_alterado[0].estoque
-        return True
+            if prod_alterado[0].id == produto.id:
+                produto.preco = prod_alterado[0].preco
+                produto.estoque = prod_alterado[0].estoque
+        
+        return True # positivo caso as alteracoes sejam aplicadas
 
     while True:
         try:
-            print("Para cancelar a qualquer momento a atualização de cadastro:\tCtrl+c")
+            print("Cancelar a qualquer momento a atualização de cadastro:\tCtrl+c")
+
             produto_selec = selecionar_produto()
             alterar_em = selecionar_mudanca(produto_selec)
             alteracoes = entrar_alteracoes(alterar_em)
 
+            # caso o usuario opte por atualizar 
+            # preco e estoque do mesmo produto
             if isinstance(alteracoes, list): 
                 produto_selec[0].preco = alteracoes[0]
                 produto_selec[0].estoque = alteracoes[1]
+            # caso pretenda alterar somente o preco
             elif isinstance(alteracoes, float):
                 produto_selec[0].preco = alteracoes
+            # caso pretenda alterar somente o estoque
             elif isinstance(alteracoes, int):
                 produto_selec[0].estoque = alteracoes
-                    
-            if aplicar_alteracao(produto_selec) == True:
-                print_sys_mensagem("Produto alterado com sucesso!")
-                return False
             
+            if aplicar_alteracao(produto_selec) == True:
+                print_sys_mensagem("Produto alterado com sucesso !")
+                return False
 
         except KeyboardInterrupt:
+
+            # cancela a operacao
             raise KeyboardInterrupt
         except:
-            print_sys_mensagem("Produto não encontrado")
+            print_sys_mensagem("Produto não encontrado !")
     
 def cadastrar_compra():
 
     # onde serao armazenadas informacoes sobre a compra
     carrinho = []
 
+    # caso o mesmo produto apareca mais de 1 vez
+    # no carrinho = True
     def is_repetido(compra_info):
         for produto in carrinho:
             if compra_info[0].id == produto.id:
@@ -470,18 +485,20 @@ def cadastrar_compra():
         if qtd_estoque >= qtd_compra:
             return True
         else:
-            print_sys_mensagem(f"A quantidade excede a máxima disponível em: {(qtd_estoque-qtd_compra)*-1} unidade(s).")
+            print_sys_mensagem(f"Quantidade excede a máxima disponível em: {(qtd_estoque-qtd_compra)*-1} unidade(s) !")
             return False
 
+    # mostra informacoes do produto a ser adicionado
+    # ao carrinho e espera confirmacao do operador
     def confirmar_insercao(prod_info):
-        print("\nINFORMAÇÕES DA COMPRA: ")
+        print_sessao_programa("\nINFORMAÇÕES DA COMPRA")
         listar_produtos(prod_info)
         while True:
             try:
                 if is_repetido(prod_info) == True:
-                    print("Este produto já está no carrinho. Deseja efetuar uma segunda entrada? (s/n) ", end="")
+                    print("Este produto já está no carrinho. Efetuar uma segunda entrada? (s/n) ", end="")
                 else: 
-                    print("Deseja adicionar o produto ao carrinho? (S/n) ", end="")
+                    print("Adicionar produto ao carrinho? (s/n) ", end="")
                 confirmacao = input()
                 if confirmacao.lower() == 's':
                     return True
@@ -490,16 +507,24 @@ def cadastrar_compra():
                 else:
                     raise Exception
             except:
-                print_sys_mensagem("Entre uma alternativa válida.")
+                print_sys_mensagem("Entre uma alternativa válida !")
+    
+    # caso seja confirmado pelo operador,
+    # o produto eh adicionado ao carrinho
+    def add_to_carrinho(prod_adc):
+        prod_adc = prod_adc[0]
+        print_sessao_programa("CARRINHO")
+        carrinho.append(prod_adc)
+        listar_produtos(carrinho)
                     
     def fechar_compra(carrinho):
         
-        # encerra exec da func caso
-        # carrinho esteja vazio
+        # encerra exec da func cadastrar 
+        # caso carrinho esteja vazio
         if len(carrinho) == 0:
             return False
         
-        print_sessao_programa("CUPOM FISCAL: ")
+        print_sessao_programa("CUPOM FISCAL")
         listar_produtos(carrinho)
         total_compra = 0
         
@@ -512,39 +537,45 @@ def cadastrar_compra():
                 if produto_comprado.id == produto.id:
                     produto.estoque -= produto_comprado.estoque
 
-        print_sys_mensagem(f"Preço Total da compra: {total_compra}")
+        print_sys_mensagem(f"Preço Total da compra: {total_compra}.")
     
+        # caso len(carrinho) >= 1 e os 
+        # produtos tenham sido retirados
+        # do estoque
         return True
-
-    def add_to_carrinho(prod_adc):
-        prod_adc = prod_adc[0]
-        print_sessao_programa("CARRINHO:")
-        carrinho.append(prod_adc)
-        listar_produtos(carrinho)
 
     while True:
         try:
             print("\nPara cancelar a compra acione: \tCtrl+C")
-            print("Para fechar o carrinho: \t'ok'")
-            print("Digite o código do produto que deseja adicionar ao carrinho: ", end="")
+            print("Para fechar o carrinho digite: \t'ok'")
+            print("Digite o código do produto: ", end="")
             produto = input()
             if is_string(produto) == True:
                 if produto.lower() == 'ok':
+
                     # caso a compra seja fechada com produtos no
-                    # carrinho, sera encerrada essa funcao. o con-
+                    # carrinho, sera encerrado este while, e a 
+                    # compra encaminhada para fechamento. o con-
                     # trario, a operacao de compra sera cancelada
                     if fechar_compra(carrinho) == True:
                         return False
                     else: 
                         raise KeyboardInterrupt
+                else:
+
+                    # caso o valor entrado seja uma string
+                    # nao esperada
+                    raise Exception
             else:
                 # converte para int somente apos a confir-
                 # macao de que a entrada nao eh uma str
                 produto = int(produto)
             
+            # onde serao armazenadas infor-
+            # macoes do produto comprado
             prod_info = []
             prod_info = buscar_produto(produto)
-            
+                 
             print("Quantidade: ",end="")
             qtd_compra = int(input())
             
@@ -557,68 +588,79 @@ def cadastrar_compra():
             prod_info[0].estoque = qtd_compra
             prod_info[0].preco = prod_info[0].preco*qtd_compra
 
+            # confirmacao do operador
             confirmacao_insercao = confirmar_insercao(prod_info)
+
             disponibilidade_estoque = is_qtd_disponivel(prod_info, qtd_compra)
 
+            # somente adiciona ao carrinho com confirmacao de quantia 
+            # valida em estoque e confirmacao de entrada do operador
             if confirmacao_insercao == True and disponibilidade_estoque == True:
                 add_to_carrinho(prod_info)
             elif confirmacao_insercao == False:
                 print_sys_mensagem("O produto não foi inserido !")
             elif disponibilidade_estoque == False:
                 print_sys_mensagem("Quantidade não disponível em estoque. Produto não inserido !")
+        
         except KeyboardInterrupt:
             print_sys_mensagem("Compra cancelada")
             return False
         except:
-            print_sys_mensagem("Por Favor, verifique o valor do código e/ou quantidade entrados.")     
+            print_sys_mensagem("Verifique o valor do código e/ou quantidade entrados.")     
 
 # inicio - lista de opcoes
 def main():
     while True:
-        print_sessao_programa("INÍCIO")
-        print("Escolha o que desejas fazer:")
-        print("\t[1] \tCadastrar um novo produto")
-        print("\t[2] \tAtualizar um produto cadastrado")
-        print("\t[3] \tRegistrar nova compra")
+        print_sessao_programa("INICIO")
+        print("Escolha sua próxima ação:")
+        print("\t[1] \tCadastrar novo produto")
+        print("\t[2] \tAtualizar produto cadastrado")
+        print("\t[3] \tRegistrar compra")
         print("\t[4] \tBuscar produto")
         print("\t[5] \tRelatório de produtos")
         print("\t[-255] \tSair")
         acao = input("Entrada: ")
         try:
             acao = int(acao)
-            if acao == 1:
+            if acao == 1: # cadastro novo produto 
                 try:
                     cadastrar_produto()
                 except KeyboardInterrupt:
-                    print_sys_mensagem("Cadastro cancelado!")
-            elif acao == 2:
+                    print_sys_mensagem("Cadastro cancelado !")
+            
+            elif acao == 2: # atualizar cadastrod de produto
                 try:
                     print_sessao_programa("ALTERAR PRODUTO")
                     atualizar_produto() 
                 except KeyboardInterrupt:
-                    print_sys_mensagem("Atualização de cadastro Cancelada!")
-            elif acao == 3:
+                    print_sys_mensagem("Atualização de cadastro Cancelada !")
+            
+            elif acao == 3: # cadastrar nova compra
                 print_sessao_programa("ADICIOINAR COMPRA")
                 cadastrar_compra()
-            elif acao == 4:
+            
+            elif acao == 4: # buscar produto na lista
                 print_sessao_programa("BUSCAR")
                 try:
                     busca = input("Entre um nome ou código do produto: ")
                     listar_produtos(buscar_produto(busca))
                 except:
-                    print_sys_mensagem("Produto não encontrado!")
-            elif acao == 5:
+                    print_sys_mensagem("Produto não encontrado !")
+            
+            elif acao == 5: # listar todos os produtos
                 try:
                     print_sessao_programa("RELATÓRIO")
                     listar_produtos(db_produtos)
                 except:
-                    print_sys_mensagem("Aparentemente a lista de produtos está vazia!")
-            elif acao == -255:
-                print_sys_mensagem("Obrigado por usar o programa!")
+                    print_sys_mensagem("Lista de produtos está vazia!")
+            
+            elif acao == -255: # sair
+                print_sys_mensagem("Obrigado por usar o programa !")
                 return False
             else:
                 raise Exception
+        
         except:
-            print_sys_mensagem("Parece que sua entrada não condiz com nenhuma opção! Por Favor, tente novamente.")
+            print_sys_mensagem("Sua entrada não condiz com nenhuma opção. Tente novamente !")
 
 main()
