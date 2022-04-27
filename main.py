@@ -18,7 +18,8 @@ def print_sys_mensagem(msg):
 
 # essa funcao situa o usuario, sobre onde ele esta, dentro do sistema.
 def print_sessao_programa(sessao):
-    print("\n",sessao,"\n","-"*15)
+    tam = len(sessao)
+    print("\n",sessao,"\n","-"*tam)
 
 # verifica se a entrada eh uma string 
 def is_string(palavra):
@@ -33,6 +34,20 @@ def is_string(palavra):
         return True
     else:
         return False
+
+def get_confirmacao():
+    conf = input("(s/n) ")
+    conf = conf.lower()
+    
+    if conf == 's':
+        return True
+    if conf == 'n': 
+        return False
+    if is_string(conf) == True and conf != 's' and conf != 'n':
+        print_sys_mensagem("Sua entrada não foi considerada válida, tente novamente!")
+    if is_string(conf) == False:
+        print_sys_mensagem("Por favor, entre uma das letras para confirmacao: (s/n)")
+    return get_confirmacao()
 
 def cadastrar_produto():
 
@@ -62,19 +77,10 @@ def cadastrar_produto():
             return False
 
     def confirmacao_de_cadastro(cad_info):
-        print("\n\nDeseja inserir o produto:")
+        print("\n\nDeseja inserir o produto: ")
         listar_produtos(cad_info)
-        confirmacao = input('\n(s/n): ')
-        print()
-        confirmacao = confirmacao.lower()
-        if confirmacao == 's':
-            confirmacao = True
-        elif confirmacao == 'n':
-            confirmacao == False
-        else:
-            raise Exception
-        
-        return confirmacao
+        conf = get_confirmacao()
+        return conf
     
     def guia_de_cadastro(valores):
         
@@ -151,8 +157,7 @@ def cadastrar_produto():
         except:
             print_sys_mensagem("O valor entrado não corresponde com nenhuma opção listada !")
 
-def listar_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
-   
+def listar_produtos(lista_de_obj):
     # caso não tenham produtos cadastrados, sera notificado que
     # a tabela nao possui elementos para fazer a listagem
     if len(lista_de_obj) < 1: 
@@ -222,7 +227,6 @@ def listar_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
         print('-'*len(linha_sep))
         print(coluna_id, coluna_nome, coluna_preco, coluna_estoque)
         print('-'*len(linha_sep))
-    
 
     def print_corpo(tam_id, tam_nome, tam_preco, tam_estoque):
          
@@ -288,7 +292,7 @@ def listar_produtos(lista_de_obj): # listagem de TODOS os produtos cadastrados
                 coluna_estoque += ' |'
 
             print(coluna_id, coluna_nome, coluna_preco, coluna_estoque)
-    
+
     print_cabecalho(tam_id, tam_nome, tam_preco, tam_estoque)
     print_corpo(tam_id, tam_nome, tam_preco, tam_estoque)
 
@@ -407,6 +411,13 @@ def atualizar_produto():
             except:
                 print_sys_mensagem("Verifique se os valores entrados são válidos !")
 
+    def confirmar_alteracoes(prod_alterado):
+        print("Alterar o produto com as seguintes alterações: ")
+
+        listar_produtos(prod_alterado)
+        conf = get_confirmacao()
+        return conf
+        
     def aplicar_alteracao(prod_alterado):
         for produto in db_produtos:
             if prod_alterado[0].id == produto.id:
@@ -434,10 +445,16 @@ def atualizar_produto():
             # caso pretenda alterar somente o estoque
             elif isinstance(alteracoes, int):
                 produto_selec[0].estoque = alteracoes
-            
-            if aplicar_alteracao(produto_selec) == True:
-                print_sys_mensagem("Produto alterado com sucesso !")
-                return False
+           
+            conf = confirmar_alteracoes(produto_selec)
+            if conf == True:
+                if aplicar_alteracao(produto_selec) == True:
+                    print_sys_mensagem("Produto alterado com sucesso !")
+                else: 
+                    print_sys_mensagem("Ocorreu algum problema ao salvar o produto !")
+            else:
+                print_sys_mensagem("Operação de alteração cancelada !")
+            return False
 
         except KeyboardInterrupt:
 
@@ -493,22 +510,14 @@ def cadastrar_compra():
     def confirmar_insercao(prod_info):
         print_sessao_programa("\nINFORMAÇÕES DA COMPRA")
         listar_produtos(prod_info)
-        while True:
-            try:
-                if is_repetido(prod_info) == True:
-                    print("Este produto já está no carrinho. Efetuar uma segunda entrada? (s/n) ", end="")
-                else: 
-                    print("Adicionar produto ao carrinho? (s/n) ", end="")
-                confirmacao = input()
-                if confirmacao.lower() == 's':
-                    return True
-                elif confirmacao.lower() == 'n':
-                    return False
-                else:
-                    raise Exception
-            except:
-                print_sys_mensagem("Entre uma alternativa válida !")
-    
+       
+        if is_repetido(prod_info) == True:
+            print("Este produto mesmo produto já está no carrinho. Efetuar uma segunda entrada? ", end="")
+        else:
+            print("Adicionar produto ao carrinho? ", end=" ")
+        conf = get_confirmacao()
+        return conf
+
     # caso seja confirmado pelo operador,
     # o produto eh adicionado ao carrinho
     def add_to_carrinho(prod_adc):
@@ -588,10 +597,12 @@ def cadastrar_compra():
             prod_info[0].estoque = qtd_compra
             prod_info[0].preco = prod_info[0].preco*qtd_compra
 
-            # confirmacao do operador
-            confirmacao_insercao = confirmar_insercao(prod_info)
-
             disponibilidade_estoque = is_qtd_disponivel(prod_info, qtd_compra)
+            if disponibilidade_estoque == True:                
+                # confirmacao do operador
+                confirmacao_insercao = confirmar_insercao(prod_info)
+            else: 
+                continue
 
             # somente adiciona ao carrinho com confirmacao de quantia 
             # valida em estoque e confirmacao de entrada do operador
